@@ -1,0 +1,14 @@
+[Unit]
+Description=Rememberd HTTP server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=ubuntu
+ExecStart=/home/ubuntu/.cargo/bin/cargo run --release --manifest-path /home/ubuntu/rememberd/Cargo.toml
+
+[Install]
+WantedBy=multi-user.target
