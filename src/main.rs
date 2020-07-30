@@ -17,8 +17,6 @@ const TEXT_TIMEOUT: u64 = 1 * 60 * 60;
 
 async fn read(hb: web::Data<Handlebars<'_>>) -> impl Responder {
     let mut text: String = TEXT.lock().expect("lock mutex").clone();
-    // TODO: add some html around this that will AJAX some PUTs when changing
-    // TODO: set up templating for the text into the html (make sure you escape it properly, what if I want to paste some html in?)
     if LAST_UPDATED.lock().expect("lock mutex").elapsed().as_secs() > TEXT_TIMEOUT {
         text = "".into();
     }
