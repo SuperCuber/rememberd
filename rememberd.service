@@ -8,8 +8,8 @@ Type=simple
 Restart=always
 RestartSec=1
 User=ubuntu
-ExecStart=/home/ubuntu/.cargo/bin/cargo run --release
-WorkingDirectory=/home/ubuntu/rememberd
+ExecStart=/home/ubuntu/rememberd
+WorkingDirectory=/home/ubuntu/
 
 [Install]
 WantedBy=multi-user.target
