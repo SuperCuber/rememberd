@@ -12,14 +12,14 @@
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4) { // Request completed
                 if (this.status != 200 || this.responseText != "success") {
-                    document.getElementById("errorMessage").innerHTML = "Error: " + this.responseText + " (status " + this.status + ")";
+                    document.getElementById("error-message").innerHTML = "Error: " + this.responseText + " (status " + this.status + ")";
                 } else {
-                    document.getElementById("errorMessage").innerHTML = "";
+                    document.getElementById("error-message").innerHTML = "";
                 }
             }
         };
         xhttp.open("PUT", "/", true);
-        xhttp.send(document.getElementById("rememberTextbox").value);
+        xhttp.send(document.getElementById("remember-textbox").value);
     }
 
     function textPaste() {
@@ -30,40 +30,86 @@
         clearTimeout(window.sendJob); // Fails silently if argument is invalid so whatever
         window.sendJob = setTimeout(updateText, SEND_COOLDOWN_MILLIS);
     }
+
+    function uploadFile() {
+        var url = "/";
+        var request = new XMLHttpRequest();
+        request.open('POST', url, true);
+        request.onload = function () {
+            location.reload();
+        };
+        request.onerror = function () {
+            document.getElementById("error-message").innerHTML = "Upload failed";
+        };
+
+        request.send(new FormData(document.getElementById("file-form")));
+    }
 </script>
 
 <style>
-    body, textarea {
+    body,
+    textarea {
         font-family: Ubuntu;
         font-style: normal;
         font-variant: normal;
         font-weight: 700;
+        color: #ddd;
 
         height: 98%;
         background-color: #1b1b2f;
     }
 
-    h1 {
-        font-size: 35px;
-        color: #ddd;
+    .top-row {
+        display: flex;
+        width: 100%;
     }
 
-    #errorMessage {
+    .title {
+        font-size: 35px;
+        flex-grow: 1;
+    }
+
+    .file-section {
+        border: 1px red;
+    }
+
+    .upload-button {
+        background-color: grey;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    a {
+        color: lightblue;
+    }
+
+    #error-message {
         color: #e43f5a;
     }
 
     textarea {
         width: 100%;
         height: 94vh;
-        border: 0;
         resize: none;
-
-        color: #ddd;
         font-size: 16px;
         font-weight: 200;
     }
 </style>
 
-<h1>Remember:</h1>
-<div id="errorMessage"></div>
-<textarea id="rememberTextbox" spellcheck="false" oninput="textChange()" onpaste="textPaste()" autofocus>{{ text }}</textarea>
+<div class="top-row">
+    <span class="title">Remember:</span>
+    <div class="file-section">
+        <form id="file-form" action="/" method="POST" style="display:inline">
+            <label for="remember-file">
+                <span class="upload-button">Upload</button>
+            </label>
+            <input type="file" id="remember-file" name="filename" onchange="uploadFile()" style="display:none">
+        </form>
+        {{#if filename}}
+        <a href="/download/{{ filename }}" download>{{filename}}</a>
+        {{/if}}
+    </div>
+</div>
+<div id="error-message"></div>
+<textarea id="remember-textbox" spellcheck="false" oninput="textChange()" onpaste="textPaste()"
+    autofocus>{{ text }}</textarea>
