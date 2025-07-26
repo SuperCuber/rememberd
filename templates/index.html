@@ -1,5 +1,3 @@
-<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Ubuntu" />
-
 <script>
     const SEND_COOLDOWN_MILLIS = 500;
 
@@ -49,18 +47,21 @@
 <style>
     body,
     textarea {
-        font-family: Ubuntu;
-        font-style: normal;
-        font-variant: normal;
-        font-weight: 700;
+        font-family: Helvetica;
         color: #ddd;
-
-        height: 98%;
         background-color: #1b1b2f;
+    }
+
+    main {
+        display: flex;
+        height: 98vh;
+        flex-flow: column nowrap
     }
 
     .top-row {
         display: flex;
+        flex-flow: row wrap;
+        align-items: center;
         width: 100%;
     }
 
@@ -69,8 +70,8 @@
         flex-grow: 1;
     }
 
-    .file-section {
-        border: 1px red;
+    #file-form {
+        margin: 0;
     }
 
     .upload-button {
@@ -88,28 +89,34 @@
     }
 
     textarea {
-        width: 100%;
-        height: 94vh;
-        resize: none;
+        flex-grow: 1;
         font-size: 16px;
         font-weight: 200;
     }
 </style>
 
-<div class="top-row">
-    <span class="title">Remember:</span>
-    <div class="file-section">
-        <form id="file-form" action="/" method="POST" style="display:inline">
-            <label for="remember-file">
-                <span class="upload-button">Upload</button>
-            </label>
-            <input type="file" id="remember-file" name="filename" onchange="uploadFile()" style="display:none">
-        </form>
-        {{#if filename}}
-        <a href="/download/{{ filename }}" download>{{filename}}</a>
-        {{/if}}
-    </div>
-</div>
-<div id="error-message"></div>
-<textarea id="remember-textbox" spellcheck="false" oninput="textChange()" onpaste="textPaste()"
-    autofocus>{{ text }}</textarea>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Remember</title>
+    </head>
+    <body>
+        <main>
+            <div class="top-row">
+                <span class="title">Remember:</span>
+                <form id="file-form">
+                    <label for="remember-file">
+                        <span class="upload-button">Upload</span>
+                    </label>
+                    <input type="file" id="remember-file" name="filename" onchange="uploadFile()" style="display:none">
+                </form>
+                {{#if filename}}
+                <a href="/download/{{ filename }}" download>{{filename}}</a>
+                {{/if}}
+            </div>
+            <div id="error-message"></div>
+            <textarea id="remember-textbox" spellcheck="false" oninput="textChange()" onpaste="textPaste()"
+                autofocus>{{ text }}</textarea>
+        </main>
+    </body>
+</html>

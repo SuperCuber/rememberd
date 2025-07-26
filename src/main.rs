@@ -1,13 +1,13 @@
 #[macro_use]
 extern crate serde_json;
 
-use std::sync::{Mutex, MutexGuard};
 use std::time::Instant;
 
 use actix_web::{
     web::{self, Bytes},
     App, HttpResponse, HttpServer, Responder,
 };
+use tokio::sync::{Mutex, MutexGuard};
 use futures::{stream, StreamExt, TryStreamExt};
 use handlebars::Handlebars;
 use lazy_static::lazy_static;
@@ -21,9 +21,9 @@ lazy_static! {
 const TEXT_TIMEOUT: u64 = 60 * 60;
 
 async fn read(hb: web::Data<Handlebars<'_>>) -> impl Responder {
-    let mut text = TEXT.lock().expect("lock mutex").clone();
-    let mut file = UPLOADED_FILE.lock().expect("lock mutex").clone();
-    if LAST_UPDATED.lock().expect("lock mutex").elapsed().as_secs() > TEXT_TIMEOUT {
+    let mut text = TEXT.lock().await.clone();
+    let mut file = UPLOADED_FILE.lock().await.clone();
+    if LAST_UPDATED.lock().await.elapsed().as_secs() > TEXT_TIMEOUT {
         text = "".into();
         file = (String::new(), Vec::new());
     }
@@ -31,25 +31,25 @@ async fn read(hb: web::Data<Handlebars<'_>>) -> impl Responder {
     let data = json!({ "text": text, "filename": file.0 });
     let body = hb.render("index", &data).unwrap();
 
-    HttpResponse::Ok().body(body)
+    HttpResponse::Ok().content_type("text/html").body(body)
 }
 
 async fn update(body: String) -> impl Responder {
-    let mut text: MutexGuard<String> = TEXT.lock().expect("lock mutex");
+    let mut text: MutexGuard<String> = TEXT.lock().await;
     *text = body;
 
-    let mut last_updated: MutexGuard<Instant> = LAST_UPDATED.lock().expect("lock mutex");
+    let mut last_updated: MutexGuard<Instant> = LAST_UPDATED.lock().await;
     *last_updated = Instant::now();
 
-    // Return something to the AJAX
+    // Return something
     "success"
 }
 
 async fn upload(mut payload: actix_multipart::Multipart) -> Result<HttpResponse, actix_web::Error> {
     // iterate over multipart stream
-    let mut file = UPLOADED_FILE.lock().expect("lock mutex");
+    let mut file = UPLOADED_FILE.lock().await;
     file.1.clear();
-    let mut last_updated = LAST_UPDATED.lock().expect("lock mutex");
+    let mut last_updated = LAST_UPDATED.lock().await;
 
     while let Ok(Some(mut field)) = payload.try_next().await {
         let content_type = field.content_disposition().unwrap();
@@ -66,7 +66,7 @@ async fn upload(mut payload: actix_multipart::Multipart) -> Result<HttpResponse,
 }
 
 async fn download() -> impl Responder {
-    let file = UPLOADED_FILE.lock().expect("lock mutex");
+    let file = UPLOADED_FILE.lock().await;
 
     HttpResponse::Ok().streaming(stream::iter(vec![Result::<_, actix_web::Error>::Ok(
         Bytes::copy_from_slice(&file.1),
