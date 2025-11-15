@@ -1,0 +1,18 @@
+# Build artifacts
+target/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+
+# Deployment files
+rememberd.service
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

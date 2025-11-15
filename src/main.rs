@@ -7,10 +7,10 @@ use actix_web::{
     web::{self, Bytes},
     App, HttpResponse, HttpServer, Responder,
 };
-use tokio::sync::{Mutex, MutexGuard};
 use futures::{stream, StreamExt, TryStreamExt};
 use handlebars::Handlebars;
 use lazy_static::lazy_static;
+use tokio::sync::{Mutex, MutexGuard};
 
 lazy_static! {
     static ref TEXT: Mutex<String> = Mutex::new(String::new());
@@ -93,7 +93,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(web::resource("/download/{name}").route(web::get().to(download)))
     })
-    .bind("127.0.0.1:8080")?
+    .bind("0.0.0.0:8080")?
     .run()
     .await
 }
